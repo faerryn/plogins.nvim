@@ -12,6 +12,10 @@ local function helptags(plogin)
     end
 end
 
+local function find_version(plogin)
+    return vim.fn.system { "git", "-C", plogin.dir, "rev-parse", "HEAD" }
+end
+
 local function subset(a, b)
     for x, _ in pairs(a) do
         if b[x] == nil then
@@ -89,19 +93,22 @@ function M.setup(plogins)
     end
 
     local function upgrade()
-        for _, source in ipairs(activated_sources) do
+        for source, _ in pairs(activated_sources) do
             local plogin = plogins[source]
             local handle = nil
+            local version = find_version(plogin)
             handle = vim.loop.spawn(
                 "git",
                 { args = { "-C", plogin.dir, "pull", "--depth", "1", "--force", "--rebase" } },
                 function(code, signal)
                     handle:close()
                     vim.defer_fn(function()
-                        helptag(plogin)
-                        pcall(plogin.upgrade_hook)
-                        print(("%s upgraded"):format(source))
-                    end)
+                        if version ~= find_version(plogin) then
+                            helptags(plogin)
+                            pcall(plogin.upgrade_hook)
+                            print(("%s upgraded"):format(source))
+                        end
+                    end, 0)
                 end
             )
         end
