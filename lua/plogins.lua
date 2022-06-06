@@ -8,7 +8,7 @@ end
 local function helptags(plogin)
     local docdir = plogin.dir .. "/doc"
     if vim.loop.fs_stat(docdir) then
-        vim.cmd(("helptags %s/doc"):format(vim.fn.fnameescape(docdir)))
+        vim.cmd(("helptags %s"):format(vim.fn.fnameescape(docdir)))
     end
 end
 
