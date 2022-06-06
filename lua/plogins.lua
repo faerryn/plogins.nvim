@@ -94,7 +94,7 @@ function M.setup(plogins)
             local handle = nil
             handle = vim.loop.spawn(
                 "git",
-                { args = { "-C", plogin.dir, "pull", "--depth", "1", "--force" } },
+                { args = { "-C", plogin.dir, "pull", "--depth", "1", "--force", "--rebase" } },
                 function(code, signal)
                     handle:close()
                     vim.defer_fn(function()
