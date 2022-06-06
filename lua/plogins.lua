@@ -73,6 +73,7 @@ function M.setup(plogins)
                     vim.defer_fn(function()
                         helptags(plogin)
                         try_activate(plogin)
+                        print(("%s installed"):format(source))
                     end, 0)
                 end
             )
@@ -93,12 +94,13 @@ function M.setup(plogins)
             local handle = nil
             handle = vim.loop.spawn(
                 "git",
-                { args = { "-C", plogin.dir, "pull", "--depth", "1" } },
+                { args = { "-C", plogin.dir, "pull", "--depth", "1", "--force" } },
                 function(code, signal)
                     handle:close()
                     vim.defer_fn(function()
                         helptag(plogin)
                         pcall(plogin.upgrade_hook)
+                        print(("%s upgraded"):format(source))
                     end)
                 end
             )
@@ -111,6 +113,7 @@ function M.setup(plogins)
             local source = entry:gsub("%%", "/")
             if plogins[source] == nil then
                 recursively_delete(("%s/%s"):format(plogins_directory, entry))
+                print(("%s removed"):format(source))
             end
         end
     end
