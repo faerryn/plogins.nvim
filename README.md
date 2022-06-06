@@ -4,6 +4,16 @@ A fast, simple, and elegant Neovim plugin manager written in Lua!
 
 ## EXAMPLE
 ```lua
+do
+    local plogins_source = "https://github.com/faerryn/plogins.nvim.git"
+    local plogins_name = plogins_source:gsub("/", "%%")
+    local plogins_dir = ("%s/site/pack/plogins/opt/%s"):format((vim.fn.stdpath "data"), plogins_name)
+    if not vim.loop.fs_stat(plogins_dir) then
+        vim.fn.system { "git", "clone", "--depth", "1", plogins_source, plogins_dir }
+    end
+    vim.cmd(("packadd %s"):format(vim.fn.fnameescape(plogins_name)))
+end
+
 local upgrade, autoremove = require("plogins").setup {
     ["https://github.com/tpope/vim-commentary.git"] = {},
     ["https://github.com/tpope/vim-repeat.git"] = {},
