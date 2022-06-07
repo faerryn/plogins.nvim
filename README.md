@@ -44,7 +44,7 @@ local upgrade, autoremove = require("plogins").setup {
     },
 
     ["https://github.com/nvim-treesitter/nvim-treesitter-textobjects.git"] = {
-        packadd_after = { ["https://github.com/nvim-treesitter/nvim-treesitter.git"] = {} },
+        packadd_after = { ["https://github.com/nvim-treesitter/nvim-treesitter.git"] = true },
         packadd_hook = function()
             require("nvim-treesitter.configs").setup {
                 textobjects = {
