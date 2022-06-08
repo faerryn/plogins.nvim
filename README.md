@@ -15,9 +15,8 @@ at a moment's notice!
 ## EXAMPLE
 ```lua
 
-local function manage_plugins(plogins_name)
-    vim.cmd(("packadd %s"):format(vim.fn.fnameescape(plogins_name)))
-    local upgrade, autoremove = require("plogins").setup {
+local function manage_plugins()
+    local plugins = {
         ["https://github.com/faerryn/plogins.nvim.git"] = {},
 
         ["https://github.com/tpope/vim-commentary.git"] = {},
@@ -69,27 +68,29 @@ local function manage_plugins(plogins_name)
         }
     }
 
-    vim.api.nvim_create_user_command("PloginsUpgrade", upgrade, {})
-    vim.api.nvim_create_user_command("PloginsAutoremove", autoremove, {})
+    local manager = require("plogins").manage(plugins)
+
+    vim.api.nvim_create_user_command("PloginsUpgrade", manager.upgrade, {})
+    vim.api.nvim_create_user_command("PloginsAutoremove", manager.autoremove, {})
 end
 
-do
-    local plogins_source = "https://github.com/faerryn/plogins.nvim.git"
-    local plogins_name = plogins_source:gsub("/", "%%")
-    local plogins_dir = ("%s/site/pack/plogins/opt/%s"):format((vim.fn.stdpath "data"), plogins_name)
-    if not vim.loop.fs_stat(plogins_dir) then
-        vim.loop.spawn(
-            "git",
-            { args = { "clone", "--depth", "1", plogins_source, plogins_dir } },
-            function(code, signal)
-                vim.defer_fn(function()
-                    manage_plugins(plogins_name)
-                end, 0)
-            end
-        )
-    else
-        manage_plugins(plogins_name)
-    end
+local plogins_source = "https://github.com/faerryn/plogins.nvim.git"
+local plogins_name = plogins_source:gsub("/", "%%")
+local plogins_dir = ("%s/site/pack/plogins/opt/%s"):format((vim.fn.stdpath "data"), plogins_name)
+if not vim.loop.fs_stat(plogins_dir) then
+    vim.loop.spawn(
+        "git",
+        { args = { "clone", "--depth", "1", plogins_source, plogins_dir } },
+        function(code, signal)
+            vim.defer_fn(function()
+                vim.cmd(("packadd %s"):format(vim.fn.fnameescape(plogins_name)))
+                manage_plugins()
+            end, 0)
+        end
+    )
+else
+    vim.cmd(("packadd %s"):format(vim.fn.fnameescape(plogins_name)))
+    manage_plugins()
 end
 
 ```

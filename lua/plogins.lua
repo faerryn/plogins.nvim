@@ -25,11 +25,19 @@ local function subset(a, b)
     return true
 end
 
+local function scandir(path)
+    local entries = {}
+    local handle = vim.loop.fs_scandir(path)
+    for entry in vim.loop.fs_scandir_next, handle do
+        table.insert(entries, entry)
+    end
+    return entries
+end
+
 local function recursively_delete(path)
     local stat = vim.loop.fs_stat(path)
     if stat.type == "directory" then
-        local handle = vim.loop.fs_scandir(path)
-        for entry in vim.loop.fs_scandir_next, handle do
+        for _, entry in ipairs(scandir(path)) do
             recursively_delete(("%s/%s"):format(path, entry))
         end
         vim.loop.fs_rmdir(path)
@@ -38,7 +46,7 @@ local function recursively_delete(path)
     end
 end
 
-function M.setup(plogins)
+function M.manage(plogins)
     local plogins_directory = ("%s/site/pack/plogins/opt"):format(vim.fn.stdpath "data")
 
     local activated_sources = {}
@@ -115,8 +123,7 @@ function M.setup(plogins)
     end
 
     local function autoremove()
-        local handle = vim.loop.fs_scandir(plogins_directory)
-        for entry in vim.loop.fs_scandir_next, handle do
+        for _, entry in ipairs(scandir(plogins_directory)) do
             local source = entry:gsub("%%", "/")
             if plogins[source] == nil then
                 recursively_delete(("%s/%s"):format(plogins_directory, entry))
@@ -125,7 +132,7 @@ function M.setup(plogins)
         end
     end
 
-    return upgrade, autoremove
+    return { upgrade = upgrade, autoremove = autoremove }
 end
 
 return M
