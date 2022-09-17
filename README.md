@@ -38,7 +38,7 @@ local function manage_plugins()
                     options = {
                         icons_enabled = false,
                         component_separators = { left = "", right = "" },
-                        section_separators = { left = "", right = "" },
+                        section_separators   = { left = "", right = "" },
                     },
                     tabline = { lualine_a = { "tabs" } },
                 })
