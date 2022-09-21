@@ -96,7 +96,9 @@ function M.manage(plogins)
     while progress do
         progress = false
         for source, _ in pairs(pending_sources) do
-            progress = try_activate(plogins[source]) or progress
+            if try_activate(plogins[source]) then
+                progress = true
+            end
         end
     end
 
