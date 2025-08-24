@@ -16,20 +16,21 @@ at a moment's notice!
 ```lua
 local function manage_plugins()
     local plugins = {
-        ["https://github.com/faerryn/plogins.nvim.git"] = {},
+        "https://github.com/faerryn/plogins.nvim.git",
 
-        ["https://github.com/tpope/vim-commentary.git"] = {},
-        ["https://github.com/tpope/vim-fugitive.git"]   = {},
-        ["https://github.com/tpope/vim-repeat.git"]     = {},
-        ["https://github.com/tpope/vim-rsi.git"]        = {},
-        ["https://github.com/tpope/vim-sleuth.git"]     = {},
-        ["https://github.com/tpope/vim-unimpaired.git"] = {},
-        ["https://github.com/tpope/vim-vinegar.git"]    = {},
+        "https://github.com/tpope/vim-surround.git",
+        "https://github.com/tpope/vim-commentary.git",
+        "https://github.com/tpope/vim-fugitive.git",
+        "https://github.com/tpope/vim-repeat.git",
+        "https://github.com/tpope/vim-rsi.git",
+        "https://github.com/tpope/vim-sleuth.git",
+        "https://github.com/tpope/vim-unimpaired.git",
+        "https://github.com/tpope/vim-vinegar.git",
+        "https://github.com/tommcdo/vim-lion.git",
+        "https://github.com/wellle/targets.vim.git",
 
-        ["https://github.com/navarasu/onedark.nvim.git"] = {
-            packadd_hook = function()
-                vim.cmd([[colorscheme onedark]])
-            end,
+        ["https://github.com/folke/tokyonight.nvim.git"] = {
+            packadd_hook = function() vim.cmd([[colorscheme tokyonight-night]]) end,
         },
 
         ["https://github.com/nvim-lualine/lualine.nvim.git"] = {
@@ -46,20 +47,20 @@ local function manage_plugins()
         },
 
         ["https://github.com/lewis6991/gitsigns.nvim.git"] = {
-            packadd_hook = function()
-                require("gitsigns").setup()
-            end,
+            packadd_hook = function() require("gitsigns").setup() end,
         },
 
         ["https://github.com/nvim-treesitter/nvim-treesitter.git"] = {
             packadd_hook = function()
                 require("nvim-treesitter.configs").setup({
                     ensure_installed = "all",
+                    ignore_install = { "ipkg" },
                     highlight = { enable = true },
                     indent    = { enable = true },
                 })
                 vim.opt.foldmethod = "expr"
                 vim.opt.foldexpr   = "nvim_treesitter#foldexpr()"
+                vim.opt.foldlevel  = 99
             end,
             upgrade_hook = function()
                 require("nvim-treesitter.install").update()
@@ -67,7 +68,7 @@ local function manage_plugins()
         },
 
         ["https://github.com/nvim-treesitter/nvim-treesitter-textobjects.git"] = {
-            packadd_after = { ["https://github.com/nvim-treesitter/nvim-treesitter.git"] = true },
+            packadd_after = { "https://github.com/nvim-treesitter/nvim-treesitter.git" },
             packadd_hook = function()
                 require("nvim-treesitter.configs").setup({
                     textobjects = {
@@ -89,8 +90,8 @@ local function manage_plugins()
 
     local manager = require("plogins").manage(plugins)
 
-    vim.api.nvim_create_user_command("PloginsUpgrade",    manager.upgrade,    {})
-    vim.api.nvim_create_user_command("PloginsAutoremove", manager.autoremove, {})
+    vim.api.nvim_create_user_command("PloginsUpgrade", manager.upgrade,    {})
+    vim.api.nvim_create_user_command("PloginsClean",   manager.autoremove, {})
 end
 
 local plogins_source = "https://github.com/faerryn/plogins.nvim.git"
