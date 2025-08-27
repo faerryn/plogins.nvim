@@ -14,98 +14,40 @@ at a moment's notice!
 
 ## EXAMPLE
 ```lua
-local function manage_plugins()
-    local plugins = {
-        "https://github.com/faerryn/plogins.nvim.git",
+local plugins = {
+    "https://github.com/faerryn/plogins.nvim.git",
 
-        "https://github.com/tpope/vim-surround.git",
-        "https://github.com/tpope/vim-commentary.git",
-        "https://github.com/tpope/vim-fugitive.git",
-        "https://github.com/tpope/vim-repeat.git",
-        "https://github.com/tpope/vim-rsi.git",
-        "https://github.com/tpope/vim-sleuth.git",
-        "https://github.com/tpope/vim-unimpaired.git",
-        "https://github.com/tpope/vim-vinegar.git",
-        "https://github.com/tommcdo/vim-lion.git",
-        "https://github.com/wellle/targets.vim.git",
+    "https://github.com/tommcdo/vim-lion.git",
+    "https://github.com/tpope/vim-commentary.git",
 
-        ["https://github.com/folke/tokyonight.nvim.git"] = {
-            packadd_hook = function() vim.cmd([[colorscheme tokyonight-night]]) end,
-        },
-
-        ["https://github.com/nvim-lualine/lualine.nvim.git"] = {
-            packadd_hook = function()
-                require("lualine").setup({
-                    options = {
-                        icons_enabled = false,
-                        component_separators = { left = "", right = "" },
-                        section_separators   = { left = "", right = "" },
-                    },
-                    tabline = { lualine_a = { "tabs" } },
-                })
-            end,
-        },
-
-        ["https://github.com/lewis6991/gitsigns.nvim.git"] = {
-            packadd_hook = function() require("gitsigns").setup() end,
-        },
-
-        ["https://github.com/nvim-treesitter/nvim-treesitter.git"] = {
-            packadd_hook = function()
-                require("nvim-treesitter.configs").setup({
-                    ensure_installed = "all",
-                    ignore_install = { "ipkg" },
-                    highlight = { enable = true },
-                    indent    = { enable = true },
-                })
-                vim.opt.foldmethod = "expr"
-                vim.opt.foldexpr   = "nvim_treesitter#foldexpr()"
-                vim.opt.foldlevel  = 99
-            end,
-            upgrade_hook = function()
-                require("nvim-treesitter.install").update()
-            end,
-        },
-
-        ["https://github.com/nvim-treesitter/nvim-treesitter-textobjects.git"] = {
-            packadd_after = { "https://github.com/nvim-treesitter/nvim-treesitter.git" },
-            packadd_hook = function()
-                require("nvim-treesitter.configs").setup({
-                    textobjects = {
-                        select = {
-                            enable = true,
-                            lookahead = true,
-                            keymaps = {
-                                ["af"] = "@function.outer",
-                                ["if"] = "@function.inner",
-                                ["ac"] = "@class.outer",
-                                ["ic"] = "@class.inner",
-                            },
-                        },
-                    },
-                })
-            end,
-        },
-    }
-
-    local manager = require("plogins").manage(plugins)
-
-    vim.api.nvim_create_user_command("PloginsUpgrade", manager.upgrade,    {})
-    vim.api.nvim_create_user_command("PloginsClean",   manager.autoremove, {})
-end
+    ["https://github.com/nvim-treesitter/nvim-treesitter.git"] = {
+        packadd_hook = function()
+            require("nvim-treesitter.configs").setup({
+                ensure_installed = "all",
+                ignore_install = { "ipkg" },
+                highlight = { enable = true },
+                indent    = { enable = true },
+            })
+            vim.opt.foldmethod = "expr"
+            vim.opt.foldexpr   = "nvim_treesitter#foldexpr()"
+        end,
+        upgrade_hook = function() require("nvim-treesitter.install").update() end,
+    },
+}
 
 local plogins_source = "https://github.com/faerryn/plogins.nvim.git"
 local plogins_name = plogins_source:gsub("/", "%%")
 local plogins_dir = ("%s/site/pack/plogins/opt/%s"):format((vim.fn.stdpath("data")), plogins_name)
-if not vim.loop.fs_stat(plogins_dir) then
-    vim.loop.spawn("git", { args = { "clone", "--depth", "1", plogins_source, plogins_dir } }, function(code, signal)
-        vim.defer_fn(function()
-            vim.cmd(("packadd %s"):format(vim.fn.fnameescape(plogins_name)))
-            manage_plugins()
-        end, 0)
-    end)
-else
+local function manage_plugins()
     vim.cmd(("packadd %s"):format(vim.fn.fnameescape(plogins_name)))
+    local manager = require("plogins").manage(plugins)
+    vim.api.nvim_create_user_command("PloginsUpgrade", manager.upgrade,    {})
+    vim.api.nvim_create_user_command("PloginsClean",   manager.autoremove, {})
+end
+if not vim.loop.fs_stat(plogins_dir) then
+    vim.loop.spawn("git", { args = { "clone", "--depth", "1", plogins_source, plogins_dir } },
+        vim.schedule_wrap(function(code, signal) manage_plugins() end))
+else
     manage_plugins()
 end
 ```
